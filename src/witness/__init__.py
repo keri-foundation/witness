@@ -1,6 +1,12 @@
+# -*- encoding: utf-8 -*-
+"""
+witness module
+
+"""
+__version__ = '1.0.0-dev0'
+
 import multicommand
 from keri import help
-
 from keri.app import directing
 
 from . import commands
@@ -22,11 +28,13 @@ def main():
 
     except Exception as ex:
         import os
-
         if os.getenv('DEBUG_KLI'):
             import traceback
-
             traceback.print_exc()
         else:
-            print(f'ERR: {ex}')
+            print(f"ERR: {ex}")
         return -1
+
+
+if __name__ == "__main__":
+    main()
