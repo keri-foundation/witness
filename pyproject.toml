@@ -1,7 +1,7 @@
 [project]
 name = "witness"
 version = "1.0.0-dev0"
-description = "Add your description here"
+description = "Witness service for KERI"
 readme = "README.md"
 authors = [
     { name = "Kevin Griffin", email = "griffin.kev@gmail.com" } 
@@ -20,4 +20,4 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.uv.sources]
-keri = { path = "../keripy", editable = true }
+keri = { git = "https://github.com/weboftrust/keripy", rev = "feat/wit-mbx-repackage" }

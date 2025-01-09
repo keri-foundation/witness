@@ -1,7 +1,7 @@
 
 .PHONY: build-witness
 
-VERSION=1.2.0
+VERSION=1.0.0-dev0
 
 define DOCKER_WARNING
 In order to use the multi-platform build enable the containerd image store
@@ -13,10 +13,10 @@ To enable the feature for Docker Desktop:
 endef
 
 build-witness: .warn
-	@docker build --platform=linux/amd64,linux/arm64 -f images/keripy.dockerfile -t weboftrust/keri:$(VERSION) .
+	@docker build --platform=linux/amd64,linux/arm64 -t ghcr.io/keri-foundation/witness:$(VERSION) .
 
 publish-witness:
-	@docker push weboftrust/keri:$(VERSION)
+	@docker push ghcr.io/keri-foundation/witness:$(VERSION)
 
 .warn:
 	@echo -e ${RED}"$$DOCKER_WARNING"${NO_COLOUR}
@@ -24,3 +24,9 @@ publish-witness:
 RED="\033[0;31m"
 NO_COLOUR="\033[0m"
 export DOCKER_WARNING
+
+check:
+	uv run ruff check
+
+fmt:
+	uv run ruff format

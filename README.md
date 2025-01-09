@@ -16,11 +16,11 @@ We greatly appreciate their work, which laid the foundation for this project.
 
 ## Roadmap
 
-- [] Promiscuous, single tenant witness with docker container
-- [] Non-promiscuous witnesses.
-- [] Witnesses with multifactor authentication
-- [] Witnesses with alternate KEL endpoint for secure event publishing of controller
-- [] Multi-tenant witness infrastructure.
+- [x] Promiscuous, single tenant witness with docker container
+- [ ] Non-promiscuous witnesses.
+- [ ] Witnesses with multi-factor authentication
+- [ ] Witnesses with alternate KEL endpoint for secure event publishing of controller
+- [ ] Multi-tenant witness infrastructure.
 
 ## Prerequisites
 
@@ -29,19 +29,87 @@ Directions for installation can be found [here](https://docs.astral.sh/uv/gettin
 
 ## Getting Started
 
-Witnesses require a keystore in order to be able to "receipt" events.
-Using the command:
-
-```shell
-uv run witness init
-```
-
-Will create a keystore.
-
 A local witness can be started with:
 
 ```shell
-uv run witness start
+witness start -H 5642 -a sample
 ```
+
+`-H` is a required parameter that specifies the port the witness will bind to.  
+`-a` is a required parameter that specifies the alias of the witness. 
+
+## Configuration
+
+A local witness has limited value to have a deployable, persistent witness, a configuration file is required.
+Depending on the command line args used to launch the witness, the witness will look for a config file in different locations.
+
+```shell
+witness start -n sample -a sample -H 5642
+```
+
+Will look to load a config file from the `~/.keri/cf/sample.json` if the directory `/usr/local/var/keri/cf` exists it will look there also.
+
+```shell
+witness start -n sample -a sample -H 5642 --config-file sample
+```
+
+Will look to load a config file from the `~/.keri/cf/main/sample.json` if the directory `/usr/local/var/keri/cf` exists it will look there also.
+
+```shell
+witness start -n sample -a sample -H 5642 --config-dir scripts
+```
+
+Will look to load a config file from the `./scripts/keri/cf/main/conf.json`.
+
+```shell
+witness start -n sample -a sample -H 5642 --config-file sample --config-dir scripts
+```
+
+Will look to load a config file from the `./scripts/keri/cf/main/sample.json`.
+
+## Config file structure
+
+The following example uses hjson to allow for comments:
+
+```hjson
+{
+  dt: 2025-01-09T15:27:18.889943+00:00
+  # named property matched name parameter of witness start command
+  sample: {
+    dt: 2025-01-09T15:27:18.889943+00:00
+    # list of protocol://ip:port combinations the witness will bind
+    curls: [
+      tcp://127.0.0.1:5632/,
+      http://127.0.0.1:5642/
+    ]
+  }
+  # list of oobi urls that will be resolved on witness start, resolution will be escrowed if unavailable and retryed.
+  iurls: []
+}
+
+```
+
+```json
+{
+  "dt": "2025-01-09T15:27:18.889943+00:00",
+  "sample": {
+    "dt": "2025-01-09T15:27:18.889943+00:00",
+    "curls": ["http://127.0.0.1:5642/"]
+  },
+  "iurls": [
+  ]
+}
+
+```
+
+## Development
+
+To make changes in keripy and have them reflected in witness, you can use the `uv` command to add keripy as an editable dependency.
+
+```shell
+uv add --editable ../keripy/
+```
+
+N.B. This will only work if you have the keripy repository cloned locally.
 
 ## Deployment

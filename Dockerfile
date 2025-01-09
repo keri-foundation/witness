@@ -16,20 +16,18 @@ RUN apk add --no-cache \
 
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
+RUN . ${HOME}/.cargo/env
+
+COPY --from=ghcr.io/astral-sh/uv:0.5.14 /uv /uvx /bin/
 
 WORKDIR /witness
+COPY . /witness
 
-RUN python -m venv venv
-
-ENV PATH=/keripy/venv/bin:${PATH}
+RUN python -m venv /opt/venv
+ENV PATH=/opt/venv/bin:${PATH}
 
 RUN pip install --upgrade pip
-RUN mkdir /keripy/src
-
-COPY requirements.txt setup.py ./
-
-RUN . ${HOME}/.cargo/env
-RUN pip install -r requirements.txt
+RUN uv sync --frozen
 
 # Runtime layer
 FROM ${BASE}
@@ -39,11 +37,17 @@ RUN apk --no-cache add \
     alpine-sdk \
     libsodium-dev
 
-WORKDIR /keripy
+RUN mkdir -p /usr/local/var/keri/cf
 
-COPY --from=builder /keripy /keripy
-COPY src/ src/
+WORKDIR /witness
 
-ENV PATH="/keripy/venv/bin:${PATH}"
+COPY --from=builder /witness /witness
 
-ENTRYPOINT [ "kli" ]
+ENV PATH="/witness/venv/bin:${PATH}"
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 5642
+ENTRYPOINT ["/entrypoint.sh"]
+
